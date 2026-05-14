@@ -9,7 +9,7 @@ import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
  * @param timeout Maximum time to wait in milliseconds
  * @returns Promise that resolves to true if shell integration became available
  */
-async function waitForShellIntegration(terminal: vscode.Terminal, timeout = 1000): Promise<boolean> {
+async function waitForShellIntegration(terminal: vscode.Terminal, timeout = 5000): Promise<boolean> {
     if (terminal.shellIntegration) {
         return true;
     }
@@ -113,7 +113,8 @@ export function registerShellTools(server: McpServer, terminal?: vscode.Terminal
                 if (!terminal) {
                     throw new Error('Terminal not available');
                 }
-                
+                // Ensure terminal is visible so shell integration can activate
+                terminal.show();
                 // Check for shell integration - wait briefly if not available
                 if (!terminal.shellIntegration) {
                     const shellIntegrationAvailable = await waitForShellIntegration(terminal);

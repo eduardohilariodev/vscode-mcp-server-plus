@@ -1,21 +1,37 @@
 {
-  "name": "vscode-mcp-server",
+  "name": "vscode-mcp-server-plus",
   "icon": "media/logo.png",
-  "displayName": "vscode-mcp-server",
-  "description": "VS Code as a MCP server",
-  "version": "0.4.0",
-  "repository": "https://github.com/juehang/vscode-mcp-server",
-  "publisher": "JuehangQin",
+  "displayName": "VSCode MCP Server Plus",
+  "description": "Enhanced VS Code MCP server with 40+ tools: file ops, git, tasks, terminals, refactoring, debugging, config, extensions, and clipboard",
+  "version": "1.0.0",
+  "repository": "https://github.com/eduardohilariodev/vscode-mcp-server-plus",
+  "publisher": "eduardohilariodev",
   "license": "MIT",
   "engines": {
     "vscode": "^1.99.0"
   },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai",
+    "copilot",
+    "claude",
+    "cursor",
+    "augment",
+    "tools",
+    "git",
+    "terminal",
+    "debug"
+  ],
   "categories": [
-    "Other"
+    "Other",
+    "Programming Languages",
+    "Debuggers"
   ],
   "activationEvents": [
     "onStartupFinished"
   ],
+  "enabledApiProposals": ["terminalDataWriteEvent"],
   "main": "./out/extension.js",
   "contributes": {
     "configuration": {
@@ -45,7 +61,15 @@
             "edit": true,
             "shell": true,
             "diagnostics": true,
-            "symbol": true
+            "symbol": true,
+            "tasks": true,
+            "git": true,
+            "terminal": true,
+            "refactoring": true,
+            "debug": false,
+            "config": true,
+            "extensions": true,
+            "clipboard": true
           },
           "properties": {
             "file": {
@@ -67,6 +91,38 @@
             "symbol": {
               "type": "boolean",
               "description": "Enable code symbol and structure analysis tools"
+            },
+            "tasks": {
+              "type": "boolean",
+              "description": "Enable VS Code task runner tools (run, stop, read output)"
+            },
+            "git": {
+              "type": "boolean",
+              "description": "Enable Git operations tools (status, diff, commit, branch)"
+            },
+            "terminal": {
+              "type": "boolean",
+              "description": "Enable advanced terminal management tools"
+            },
+            "refactoring": {
+              "type": "boolean",
+              "description": "Enable code refactoring tools (rename, format, organize imports)"
+            },
+            "debug": {
+              "type": "boolean",
+              "description": "Enable debug adapter tools (breakpoints, evaluate). Defaults to false to avoid interfering with active debug sessions."
+            },
+            "config": {
+              "type": "boolean",
+              "description": "Enable workspace configuration read/write tools"
+            },
+            "extensions": {
+              "type": "boolean",
+              "description": "Enable VS Code extensions management tools"
+            },
+            "clipboard": {
+              "type": "boolean",
+              "description": "Enable clipboard read/write tools"
             }
           },
           "description": "Configure which MCP tools are enabled"
@@ -75,16 +131,12 @@
     },
     "commands": [
       {
-        "command": "vscode-mcp-server.helloWorld",
-        "title": "Hello World"
-      },
-      {
         "command": "vscode-mcp-server.showServerInfo",
-        "title": "Show MCP Server Information"
+        "title": "MCP Server Plus: Show Server Information"
       },
       {
         "command": "vscode-mcp-server.toggleServer",
-        "title": "Toggle MCP Server"
+        "title": "MCP Server Plus: Toggle Server"
       }
     ]
   },

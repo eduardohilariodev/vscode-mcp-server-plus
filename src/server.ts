@@ -9,6 +9,14 @@ import { registerEditTools } from './tools/edit-tools';
 import { registerShellTools } from './tools/shell-tools';
 import { registerDiagnosticsTools } from './tools/diagnostics-tools';
 import { registerSymbolTools } from './tools/symbol-tools';
+import { registerTaskTools } from './tools/task-tools';
+import { registerGitTools } from './tools/git-tools';
+import { registerTerminalTools } from './tools/terminal-tools';
+import { registerRefactoringTools } from './tools/refactoring-tools';
+import { registerDebugTools } from './tools/debug-tools';
+import { registerConfigTools } from './tools/config-tools';
+import { registerExtensionsTools } from './tools/extensions-tools';
+import { registerClipboardTools } from './tools/clipboard-tools';
 import { logger } from './utils/logger';
 
 export interface ToolConfiguration {
@@ -17,6 +25,14 @@ export interface ToolConfiguration {
     shell: boolean;
     diagnostics: boolean;
     symbol: boolean;
+    tasks: boolean;
+    git: boolean;
+    terminal: boolean;
+    refactoring: boolean;
+    debug: boolean;
+    config: boolean;
+    extensions: boolean;
+    clipboard: boolean;
 }
 
 export class MCPServer {
@@ -43,14 +59,22 @@ export class MCPServer {
             edit: true,
             shell: true,
             diagnostics: true,
-            symbol: true
+            symbol: true,
+            tasks: true,
+            git: true,
+            terminal: true,
+            refactoring: true,
+            debug: false,
+            config: true,
+            extensions: true,
+            clipboard: true
         };
         this.app = express();
         this.app.use(express.json());
 
         // Initialize MCP Server
         this.server = new McpServer({
-            name: "vscode-mcp-server",
+            name: "vscode-mcp-server-plus",
             version: "1.0.0",
         }, {
             capabilities: {
@@ -114,6 +138,70 @@ export class MCPServer {
                 logger.info('MCP symbol tools registered successfully');
             } else {
                 logger.info('MCP symbol tools disabled by configuration');
+            }
+
+            // Register task tools if enabled
+            if (this.toolConfig.tasks) {
+                registerTaskTools(this.server);
+                logger.info('MCP task tools registered successfully');
+            } else {
+                logger.info('MCP task tools disabled by configuration');
+            }
+
+            // Register git tools if enabled
+            if (this.toolConfig.git) {
+                registerGitTools(this.server);
+                logger.info('MCP git tools registered successfully');
+            } else {
+                logger.info('MCP git tools disabled by configuration');
+            }
+
+            // Register terminal tools if enabled
+            if (this.toolConfig.terminal) {
+                registerTerminalTools(this.server);
+                logger.info('MCP terminal tools registered successfully');
+            } else {
+                logger.info('MCP terminal tools disabled by configuration');
+            }
+
+            // Register refactoring tools if enabled
+            if (this.toolConfig.refactoring) {
+                registerRefactoringTools(this.server);
+                logger.info('MCP refactoring tools registered successfully');
+            } else {
+                logger.info('MCP refactoring tools disabled by configuration');
+            }
+
+            // Register debug tools if enabled
+            if (this.toolConfig.debug) {
+                registerDebugTools(this.server);
+                logger.info('MCP debug tools registered successfully');
+            } else {
+                logger.info('MCP debug tools disabled by configuration');
+            }
+
+            // Register config tools if enabled
+            if (this.toolConfig.config) {
+                registerConfigTools(this.server);
+                logger.info('MCP config tools registered successfully');
+            } else {
+                logger.info('MCP config tools disabled by configuration');
+            }
+
+            // Register extensions tools if enabled
+            if (this.toolConfig.extensions) {
+                registerExtensionsTools(this.server);
+                logger.info('MCP extensions tools registered successfully');
+            } else {
+                logger.info('MCP extensions tools disabled by configuration');
+            }
+
+            // Register clipboard tools if enabled
+            if (this.toolConfig.clipboard) {
+                registerClipboardTools(this.server);
+                logger.info('MCP clipboard tools registered successfully');
+            } else {
+                logger.info('MCP clipboard tools disabled by configuration');
             }
         } else {
             logger.warn('File listing callback not set during tools setup');

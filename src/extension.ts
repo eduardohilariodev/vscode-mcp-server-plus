@@ -28,7 +28,15 @@ function getToolConfiguration(): ToolConfiguration {
         edit: enabledTools.edit ?? true,
         shell: enabledTools.shell ?? true,
         diagnostics: enabledTools.diagnostics ?? true,
-        symbol: enabledTools.symbol ?? true
+        symbol: enabledTools.symbol ?? true,
+        tasks: enabledTools.tasks ?? true,
+        git: enabledTools.git ?? true,
+        terminal: enabledTools.terminal ?? true,
+        refactoring: enabledTools.refactoring ?? true,
+        debug: enabledTools.debug ?? false,
+        config: enabledTools.config ?? true,
+        extensions: enabledTools.extensions ?? true,
+        clipboard: enabledTools.clipboard ?? true
     };
 }
 
@@ -148,7 +156,7 @@ async function toggleServerState(context: vscode.ExtensionContext): Promise<void
 }
 
 export async function activate(context: vscode.ExtensionContext) {
-    logger.info('Activating vscode-mcp-server extension');
+    logger.info('Activating vscode-mcp-server-plus extension');
 
     try {
         // Get configuration

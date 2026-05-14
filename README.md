@@ -1,263 +1,200 @@
-# VS Code MCP Server
+# VSCode MCP Server Plus
 
-A Visual Studio Code extension (available on the [Marketplace](https://marketplace.visualstudio.com/items?itemName=JuehangQin.vscode-mcp-server)) that allows Claude and other MCP clients to code directly in VS Code! Inspired by [Serena](https://github.com/oraios/serena), but using VS Code's built-in capabilities. Perfect for extending existing coding agents like Claude Code with VS Code-specific capabilities (symbol search, document outlines) without duplicating tools they already have. Note that this extension uses the streamable HTTP API, not the SSE API.
+A supercharged fork of [vscode-mcp-server](https://github.com/juehang/vscode-mcp-server) that exposes **50+ VS Code tools** via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io), enabling Claude, Copilot, and other AI agents to interact deeply with your editor.
 
-This extension can allow for execution of shell commands. This means that there is a potential security risk, so use with caution, and ensure that you trust the MCP client that you are using and that the port is not exposed to anything. Authentication would help, but as the MCP authentication spec is still in flux, this has not been implemented for now.
+> **Original**: 12 tools across 5 categories  
+> **Plus**: 50+ tools across 13 categories — tasks, git, terminals, refactoring, debugging, config, extensions, clipboard, and more.
 
-PRs are welcome!
+## Features
 
-## Demo Video
-https://github.com/user-attachments/assets/20b87dfb-fc39-4710-a910-b9481dde1e90
+### Original Tools (from upstream)
+
+| Category | Tools |
+|----------|-------|
+| **File** | `list_files_code`, `read_file_code` |
+| **Edit** | `create_file_code`, `replace_lines_code`, `copy_file_code`, `move_file_code`, `rename_file_code` |
+| **Shell** | `execute_shell_command_code` |
+| **Diagnostics** | `get_diagnostics_code` |
+| **Symbol** | `search_symbols_code`, `get_document_symbols_code`, `get_symbol_definition_code` |
+
+### New in Plus ✨
+
+| Category | Tools | Description |
+|----------|-------|-------------|
+| **Tasks** | `list_tasks_code`, `run_task_code`, `read_task_output_code`, `terminate_task_code`, `clear_task_output_code` | Full VS Code task lifecycle — run builds, read output, terminate watchers |
+| **Git** | `git_status_code`, `git_diff_code`, `git_log_code`, `git_stage_code`, `git_commit_code`, `git_branch_code`, `git_stash_code` | Native Git integration via VS Code's built-in Git extension |
+| **Terminal** | `list_terminals_code`, `create_terminal_code`, `send_terminal_text_code`, `close_terminal_code`, `show_terminal_code` | Advanced terminal management beyond shell execution |
+| **Refactoring** | `rename_symbol_code`, `format_document_code`, `organize_imports_code`, `code_actions_code` | LSP-powered code transformations |
+| **Debug** | `list_debug_configs_code`, `start_debug_code`, `stop_debug_code`, `set_breakpoint_code`, `list_breakpoints_code`, `debug_evaluate_code` | Debug adapter integration |
+| **Config** | `read_config_code`, `write_config_code`, `get_workspace_info_code`, `list_config_sections_code` | VS Code settings management |
+| **Extensions** | `list_extensions_code`, `get_extension_info_code`, `install_extension_code`, `uninstall_extension_code`, `enable_extension_code` | Extension marketplace operations |
+| **Clipboard** | `read_clipboard_code`, `write_clipboard_code` | System clipboard access |
 
 ## Installation
 
-1. Install the extension from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=JuehangQin.vscode-mcp-server) or clone this repository and run `npm install` and `npm run compile` to build it.
+### From VS Code Marketplace
 
-## Claude Desktop Configuration
+1. Open VS Code
+2. Go to Extensions (`Ctrl+Shift+X`)
+3. Search for **"VSCode MCP Server Plus"**
+4. Click **Install**
 
-Claude Desktop can be configured to use this extension as an MCP server. To do this, your `claude_desktop_config.json` file should look like this:
+### From Source
+
+```bash
+git clone https://github.com/eduardohilariodev/vscode-mcp-server-plus.git
+cd vscode-mcp-server-plus
+npm install
+npm run compile
 ```
+
+Then press `F5` in VS Code to launch the Extension Development Host.
+
+## Configuration
+
+### MCP Client Configuration
+
+Configure your MCP client to connect to the extension's HTTP endpoint:
+
+```json
 {
   "mcpServers": {
-    "vscode-mcp-server": {
-        "command": "npx",
-        "args": ["mcp-remote@next", "http://localhost:3000/mcp"]
+    "vscode-mcp-server-plus": {
+      "url": "http://127.0.0.1:3100/mcp"
     }
-
   }
 }
 ```
 
-I also like to use this extension in a Claude project, as it allows me to specify additional instructions for Claude. I find the following prompt to work well:
-```
-You are working on an existing codebase, which you can access using your tools. These code tools interact with a VS Code workspace.
+### Extension Settings
 
-WORKFLOW ESSENTIALS:
-1. Always start exploration with list_files_code on root directory (.) first
-2. CRITICAL: Run get_diagnostics_code after EVERY set of code changes before completing tasks
-3. For small edits (≤10 lines): use replace_lines_code with exact original content
-4. For large changes, new files, or uncertain content: use create_file_code with overwrite=true
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `vscode-mcp-server-plus.port` | `3000` | HTTP server port |
+| `vscode-mcp-server-plus.enabledTools.file` | `true` | File listing and reading |
+| `vscode-mcp-server-plus.enabledTools.edit` | `true` | File creation and editing |
+| `vscode-mcp-server-plus.enabledTools.shell` | `true` | Shell command execution |
+| `vscode-mcp-server-plus.enabledTools.diagnostics` | `true` | Language diagnostics |
+| `vscode-mcp-server-plus.enabledTools.symbol` | `true` | Symbol search and navigation |
+| `vscode-mcp-server-plus.enabledTools.tasks` | `true` | VS Code task management |
+| `vscode-mcp-server-plus.enabledTools.git` | `true` | Git operations |
+| `vscode-mcp-server-plus.enabledTools.terminal` | `true` | Terminal management |
+| `vscode-mcp-server-plus.enabledTools.refactoring` | `true` | Code refactoring |
+| `vscode-mcp-server-plus.enabledTools.debug` | `false` | Debug adapter (disabled by default — can interfere with active sessions) |
+| `vscode-mcp-server-plus.enabledTools.config` | `true` | Workspace configuration |
+| `vscode-mcp-server-plus.enabledTools.extensions` | `true` | Extension management |
+| `vscode-mcp-server-plus.enabledTools.clipboard` | `true` | Clipboard access |
 
-EXPLORATION STRATEGY:
-- Start: list_files_code with path='.' (never recursive on root)
-- Understand structure: read key files like package.json, README, main entry points
-- Find symbols: use search_symbols_code for functions/classes, get_document_symbols_code for file overviews
-- Before editing: read_file_code the target file to understand current content
+### Disabling Tool Categories
 
-EDITING BEST PRACTICES:
-- Small modifications: replace_lines_code (requires exact original content match)
-- If replace_lines_code fails: read_file_code the target lines, then retry with correct content
-- Large changes: create_file_code with overwrite=true is more reliable
-- After any changes: get_diagnostics_code to check for errors
+To disable specific tool categories, add to your VS Code `settings.json`:
 
-PLANNING REQUIREMENTS:
-Before making code modifications, present a comprehensive plan including:
-- Confidence level (1-10) and reasoning
-- Specific tools you'll use and why
-- Files you'll modify and approach (small edits vs complete rewrites)
-- How you'll verify the changes work (diagnostics, testing, etc.)
-
-ERROR HANDLING:
-- Let errors happen naturally - don't add unnecessary try/catch blocks
-- For tool failures: follow the specific recovery guidance in each tool's description
-- If uncertain about file content: use read_file_code to verify before making changes
-
-APPROVAL PROCESS:
-IMPORTANT: Only run code modification tools after presenting a plan and receiving explicit approval. Each change requires separate approval.
-
-Do not add tests unless specifically requested. If you believe testing is important, explain why and let the user decide.
+```json
+{
+  "vscode-mcp-server-plus.enabledTools": {
+    "git": false,
+    "debug": false
+  }
+}
 ```
 
-For context efficiency when exploring codebases, consider adding this to your CLAUDE.md:
-```
-## VS Code Symbol Tools for Context Efficiency
-Use VS Code symbol tools to reduce context consumption:
-- `get_document_symbols_code` for file structure overview instead of reading entire files
-- `search_symbols_code` to find symbols by name across the project
-- `get_symbol_definition_code` for type info and docs without full file context
-- Workflow: get outline → search symbols → get definitions → read implementation only when needed
-```
+## Tool Reference
 
+### Task Tools
 
+- **`list_tasks_code`** — List all available tasks from `tasks.json` and extensions
+- **`run_task_code`** — Run a task by label, with optional `waitForExit` for finite tasks
+- **`read_task_output_code`** — Read captured terminal output (ANSI-stripped, with buffer management)
+- **`terminate_task_code`** — Stop a running task
+- **`clear_task_output_code`** — Clear output buffers for memory management
 
-This extension serves as a Model Context Protocol (MCP) server, exposing VS Code's filesystem and editing capabilities to MCP clients.
+> Task output capture requires `terminalDataWriteEvent` proposed API (VS Code 1.93+)
 
-## Features
+### Git Tools
 
-The VS Code MCP Server extension implements an MCP-compliant server that allows AI models and other MCP clients to:
+- **`git_status_code`** — Working tree status with branch info
+- **`git_diff_code`** — Unified diff (staged or unstaged)
+- **`git_log_code`** — Commit history with optional file/author/count filters
+- **`git_stage_code`** — Stage or unstage files
+- **`git_commit_code`** — Create commits (with optional amend)
+- **`git_branch_code`** — List, create, switch, or delete branches
+- **`git_stash_code`** — Save, pop, list, or drop stashes
 
-- **List files and directories** in your VS Code workspace
-- **Read file contents** with encoding support and size limits
-- **Move files and directories** with proper refactoring support for imports
-- **Rename files and directories** with automatic reference updates
-- **Copy files** to new locations (files only, not directories)
-- **Search for symbols** across your workspace
-- **Get symbol definitions** and hover information by line and symbol name
-- **Create new files** using VS Code's WorkspaceEdit API
-- **Make line replacements** in files
-- **Check for diagnostics** (errors and warnings) in your workspace
-- **Execute shell commands** in the integrated terminal with shell integration
-- **Toggle the server** on and off via a status bar item
+### Terminal Tools
 
-This extension enables AI assistants and other tools to interact with your VS Code workspace through the standardized MCP protocol.
+- **`list_terminals_code`** — List active terminals with PID and status
+- **`create_terminal_code`** — Create named terminal with optional cwd/env
+- **`send_terminal_text_code`** — Send commands to a terminal by name
+- **`close_terminal_code`** — Dispose a terminal
+- **`show_terminal_code`** — Bring terminal to focus
 
-## How It Works
+### Refactoring Tools
 
-The extension creates an MCP server that:
+- **`rename_symbol_code`** — LSP rename across workspace
+- **`format_document_code`** — Format file with active formatter
+- **`organize_imports_code`** — Sort and organize imports
+- **`code_actions_code`** — List and apply quick fixes at a position
 
-1. Runs locally on a configurable port (when enabled)
-2. Handles MCP protocol requests via HTTP
-3. Exposes VS Code's functionality as MCP tools
-4. Provides a status bar indicator showing server status, which can be clicked to toggle the server on/off
+### Debug Tools
 
-## Supported MCP Tools
+- **`list_debug_configs_code`** — List launch.json configurations
+- **`start_debug_code`** — Start debug session
+- **`stop_debug_code`** — Stop active debug session(s)
+- **`set_breakpoint_code`** — Add/remove breakpoints with conditions
+- **`list_breakpoints_code`** — List all breakpoints
+- **`debug_evaluate_code`** — Evaluate expressions in debug context
 
-### File Tools
-- **list_files_code**: Lists files and directories in your workspace
-  - Parameters:
-    - `path`: The path to list files from
-    - `recursive` (optional): Whether to list files recursively
+### Config Tools
 
-- **read_file_code**: Reads file contents
-  - Parameters:
-    - `path`: The path to the file to read
-    - `encoding` (optional): File encoding (default: utf-8)
-    - `maxCharacters` (optional): Maximum character count (default: 100,000)
+- **`read_config_code`** — Read any VS Code setting
+- **`write_config_code`** — Update settings (user/workspace scope)
+- **`get_workspace_info_code`** — Workspace metadata
+- **`list_config_sections_code`** — Discover setting sections
 
-- **move_file_code**: Moves a file or directory to a new location using VS Code's WorkspaceEdit API
-  - Parameters:
-    - `sourcePath`: The current path of the file or directory to move
-    - `targetPath`: The new path where the file or directory should be moved to
-    - `overwrite` (optional): Whether to overwrite if target already exists (default: false)
+### Extensions Tools
 
-- **rename_file_code**: Renames a file or directory using VS Code's WorkspaceEdit API
-  - Parameters:
-    - `filePath`: The current path of the file or directory to rename
-    - `newName`: The new name for the file or directory
-    - `overwrite` (optional): Whether to overwrite if a file with the new name already exists (default: false)
+- **`list_extensions_code`** — List installed extensions
+- **`get_extension_info_code`** — Detailed extension metadata
+- **`install_extension_code`** — Install from marketplace
+- **`uninstall_extension_code`** — Remove an extension
+- **`enable_extension_code`** — Enable/disable extensions
 
-- **copy_file_code**: Copies a file to a new location using VS Code's file system API
-  - Parameters:
-    - `sourcePath`: The path of the file to copy
-    - `targetPath`: The path where the copy should be created
-    - `overwrite` (optional): Whether to overwrite if target already exists (default: false)
+### Clipboard Tools
 
-### Edit Tools
-- **create_file_code**: Creates a new file using VS Code's WorkspaceEdit API
-  - Parameters:
-    - `path`: The path to the file to create
-    - `content`: The content to write to the file
-    - `overwrite` (optional): Whether to overwrite if the file exists (default: false)
-    - `ignoreIfExists` (optional): Whether to ignore if the file exists (default: false)
+- **`read_clipboard_code`** — Read clipboard text
+- **`write_clipboard_code`** — Write text to clipboard
 
-- **replace_lines_code**: Replaces specific lines in a file
-  - Parameters:
-    - `path`: The path to the file to modify
-    - `startLine`: The start line number (1-based, inclusive)
-    - `endLine`: The end line number (1-based, inclusive)
-    - `content`: The new content to replace the lines with
-    - `originalCode`: The original code for validation
+## Security
 
-### Diagnostics Tools
-- **get_diagnostics_code**: Checks for warnings and errors in your workspace
-  - Parameters:
-    - `path` (optional): File path to check (if not provided, checks the entire workspace)
-    - `severities` (optional): Array of severity levels to include (0=Error, 1=Warning, 2=Information, 3=Hint). Default: [0, 1]
-    - `format` (optional): Output format ('text' or 'json'). Default: 'text'
-    - `includeSource` (optional): Whether to include the diagnostic source. Default: true
+⚠️ This extension exposes powerful VS Code APIs over HTTP. Use with caution:
 
-  This tool is particularly useful for:
-  - Code quality checks before committing changes
-  - Verifying fixes resolved all reported issues
-  - Identifying problems in specific files or the entire workspace
+- The server binds to `127.0.0.1` (localhost only) by default
+- **Shell execution**, **git commit/push**, **extension install**, and **config write** can modify your system
+- **Debug evaluate** can execute arbitrary code in the debug context
+- Disable tool categories you don't need via `enabledTools` configuration
+- Ensure the port is not exposed to untrusted networks
 
-### Symbol Tools
-- **search_symbols_code**: Searches for symbols across the workspace
-  - Parameters:
-    - `query`: The search query for symbol names
-    - `maxResults` (optional): Maximum number of results to return (default: 10)
-  
-  This tool is useful for:
-  - Finding definitions of symbols (functions, classes, variables, etc.) across the codebase
-  - Exploring project structure and organization
-  - Locating specific elements by name
+## Development
 
-- **get_symbol_definition_code**: Gets definition information for a symbol in a file
-  - Parameters:
-    - `path`: The path to the file containing the symbol
-    - `line`: The line number of the symbol
-    - `symbol`: The symbol name to look for on the specified line
-  
-  This tool provides:
-  - Type information, documentation, and source details for symbols
-  - Code context showing the line where the symbol appears
-  - Symbol range information
-  
-  It's particularly useful for:
-  - Understanding what a symbol represents without navigating away
-  - Checking function signatures, type definitions, or documentation
-  - Quick reference for APIs or library functions
-
-- **get_document_symbols_code**: Gets an outline of all symbols in a file, showing the hierarchical structure
-  - Parameters:
-    - `path`: The path to the file to analyze (relative to workspace)
-    - `maxDepth` (optional): Maximum nesting depth to display
-  
-  This tool provides:
-  - Complete symbol tree for a document (similar to VS Code's Outline view)
-  - Hierarchical structure showing classes, functions, methods, variables, etc.
-  - Position information and symbol kinds for each symbol
-  - Summary statistics by symbol type
-  
-  It's particularly useful for:
-  - Understanding file structure and organization at a glance
-  - Getting an overview of all symbols in a document
-  - Analyzing code architecture and relationships
-  - Finding all symbols of specific types within a file
-
-### Shell Tools
-- **execute_shell_command_code**: Executes a shell command in the VS Code integrated terminal with shell integration
-  - Parameters:
-    - `command`: The shell command to execute
-    - `cwd` (optional): Optional working directory for the command (default: '.')
-
-  This tool is useful for:
-  - Running CLI commands and build operations
-  - Executing git commands
-  - Performing any shell operations that require terminal access
-  - Getting command output for analysis and further processing
-
-## Caveats/TODO
-
-Currently, only one workspace is supported. The extension also only works locally, to avoid exposing your VS Code instance to any network you may be connected to.
-
-## Extension Settings
-
-* `vscode-mcp-server.port`: The port number for the MCP server (default: 3000)
-* `vscode-mcp-server.host`: Host address for the MCP server (default: 127.0.0.1)
-* `vscode-mcp-server.defaultEnabled`: Whether the MCP server should be enabled by default on VS Code startup
-* `vscode-mcp-server.enabledTools`: Configure which tool categories are enabled (file, edit, shell, diagnostics, symbol)
-
-**Selective Tool Configuration**: Useful for coding agents that already have certain capabilities. For example, with Claude Code you might disable file/edit tools and only enable symbol tools to add VS Code-specific symbol searching without tool duplication.
-
-## Using with MCP Clients
-
-To connect MCP clients to this server, configure them to use:
-```
-http://localhost:3000/mcp
+```bash
+npm install          # install dependencies
+npm run compile      # build TypeScript
+npm run watch        # watch mode for development
+npm run lint         # run ESLint
 ```
 
-Or if you've configured a custom host:
+### Packaging
+
+```bash
+npx vsce package     # creates .vsix file
+npx vsce publish     # publish to marketplace
 ```
-http://[your-host]:3000/mcp
-```
 
-Remember that you need to enable the server first by clicking on the status bar item!
+## Credits
 
-## Contributing
-
-Contributions are welcome! Feel free to submit issues or pull requests.
+Forked from [juehang/vscode-mcp-server](https://github.com/juehang/vscode-mcp-server) (MIT License).  
+Original work by [Juehang Qin](https://github.com/juehang).
 
 ## License
 
-[MIT](LICENSE)
+MIT — see [LICENSE](LICENSE) for details.
